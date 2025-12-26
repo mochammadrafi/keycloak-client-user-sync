@@ -22,6 +22,7 @@ public class ClientUserSyncConfig {
     private boolean retryEnabled = true;
     private int maxRetries = 3;
     private int retryDelay = 5;
+    private boolean enableLogging = true;
 
     public ClientUserSyncConfig() {
         this.apiHeaders = new HashMap<>();
@@ -85,6 +86,7 @@ public class ClientUserSyncConfig {
         cfg.setMaxRetries(parseInt(config.get("maxRetries"), 3));
         cfg.setRetryDelay(parseInt(config.get("retryDelay"), 5));
         cfg.setRetryEnabled(parseBoolean(config.get("retryEnabled"), true));
+        cfg.setEnableLogging(parseBoolean(config.get("enableLogging"), true));
         
         return cfg;
     }
@@ -209,6 +211,14 @@ public class ClientUserSyncConfig {
 
     public void setRetryDelay(int retryDelay) {
         this.retryDelay = retryDelay;
+    }
+
+    public boolean isEnableLogging() {
+        return enableLogging;
+    }
+
+    public void setEnableLogging(boolean enableLogging) {
+        this.enableLogging = enableLogging;
     }
 }
 

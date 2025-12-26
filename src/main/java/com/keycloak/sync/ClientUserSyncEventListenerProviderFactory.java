@@ -60,6 +60,9 @@ public class ClientUserSyncEventListenerProviderFactory implements EventListener
             
             String retryDelay = realm.getAttribute("client-user-sync.retryDelay");
             if (retryDelay != null) configMap.put("retryDelay", retryDelay);
+            
+            String enableLogging = realm.getAttribute("client-user-sync.enableLogging");
+            if (enableLogging != null) configMap.put("enableLogging", enableLogging);
         }
         
         ClientUserSyncConfig config = ClientUserSyncConfig.fromMap(configMap);
@@ -81,6 +84,7 @@ public class ClientUserSyncEventListenerProviderFactory implements EventListener
             globalConfig.put("retryEnabled", config.get("retryEnabled", "true"));
             globalConfig.put("maxRetries", config.get("maxRetries", "3"));
             globalConfig.put("retryDelay", config.get("retryDelay", "5"));
+            globalConfig.put("enableLogging", config.get("enableLogging", "true"));
         }
     }
 

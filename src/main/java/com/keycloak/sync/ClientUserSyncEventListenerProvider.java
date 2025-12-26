@@ -28,34 +28,53 @@ public class ClientUserSyncEventListenerProvider implements EventListenerProvide
         this.session = session;
         this.config = config;
         this.syncService = new UserSyncService(config);
+        logger.infof("[ClientUserSync] EventListenerProvider initialized with enableLogging=%s", config.isEnableLogging());
     }
 
     @Override
     public void onEvent(Event event) {
         try {
+            logger.infof("[ClientUserSync] Event received: type=%s, eventId=%s, userId=%s, clientId=%s, realmId=%s, ipAddress=%s, enableLogging=%s",
+                    event.getType(), event.getId(), event.getUserId(), event.getClientId(), event.getRealmId(), event.getIpAddress(), config.isEnableLogging());
+
             if (!shouldProcessEvent(event)) {
+                logger.debugf("[ClientUserSync] Event skipped (not in configured event types): type=%s, eventId=%s, enableLogging=%s",
+                        event.getType(), event.getId(), config.isEnableLogging());
                 return;
             }
 
+            if (config.isEnableLogging() && event.getType() == EventType.LOGIN) {
+                logger.infof("[ClientUserSync] Login event triggered: eventId=%s, userId=%s, clientId=%s, ipAddress=%s",
+                        event.getId(), event.getUserId(), event.getClientId(), event.getIpAddress());
+            }
+
             if (!shouldProcessClient(event.getClientId())) {
-                logger.debugf("Event skipped for client: %s (not in configured client list)", event.getClientId());
+                if (config.isEnableLogging()) {
+                    logger.debugf("[ClientUserSync] Event skipped for client: %s (not in configured client list)", event.getClientId());
+                }
                 return;
             }
 
             UserSyncData syncData = extractUserData(event);
             
             if (syncData == null) {
-                logger.warnf("Failed to extract user data from event: %s", event.getId());
+                if (config.isEnableLogging()) {
+                    logger.warnf("[ClientUserSync] Failed to extract user data from event: %s", event.getId());
+                }
                 return;
             }
 
             syncService.syncUserData(syncData);
             
-            logger.infof("User sync event processed: eventId=%s, userId=%s, eventType=%s, clientId=%s",
-                    event.getId(), syncData.getUserId(), event.getType(), event.getClientId());
+            if (config.isEnableLogging()) {
+                logger.infof("[ClientUserSync] User sync event processed: eventId=%s, userId=%s, eventType=%s, clientId=%s",
+                        event.getId(), syncData.getUserId(), event.getType(), event.getClientId());
+            }
 
         } catch (Exception e) {
-            logger.errorf(e, "Error processing event: %s", event.getId());
+            if (config.isEnableLogging()) {
+                logger.errorf(e, "[ClientUserSync] Error processing event: %s", event.getId());
+            }
         }
     }
 
@@ -96,13 +115,17 @@ public class ClientUserSyncEventListenerProvider implements EventListenerProvide
         try {
             RealmModel realm = session.realms().getRealm(event.getRealmId());
             if (realm == null) {
-                logger.warnf("Realm not found: %s", event.getRealmId());
+                if (config.isEnableLogging()) {
+                    logger.warnf("[ClientUserSync] Realm not found: %s", event.getRealmId());
+                }
                 return null;
             }
 
             UserModel user = session.users().getUserById(realm, event.getUserId());
             if (user == null) {
-                logger.warnf("User not found: %s", event.getUserId());
+                if (config.isEnableLogging()) {
+                    logger.warnf("[ClientUserSync] User not found: %s", event.getUserId());
+                }
                 return null;
             }
 
@@ -133,7 +156,9 @@ public class ClientUserSyncEventListenerProvider implements EventListenerProvide
             return syncData;
 
         } catch (Exception e) {
-            logger.errorf(e, "Error extracting user data from event: %s", event.getId());
+            if (config.isEnableLogging()) {
+                logger.errorf(e, "[ClientUserSync] Error extracting user data from event: %s", event.getId());
+            }
             return null;
         }
     }
