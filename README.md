@@ -2,16 +2,6 @@
 
 A Keycloak Event Listener SPI plugin that captures user authentication events (like registration and login) in real-time for specific clients, extracts user identity data, and automatically sends it to external systems via API endpoints.
 
-## Features
-
-- ✅ **Event-driven**: Captures authentication events in real-time without polling
-- ✅ **Client-specific**: Filters events by specific client IDs
-- ✅ **Configurable**: Flexible configuration per-realm or globally
-- ✅ **Secure**: Follows official Keycloak security lifecycle
-- ✅ **Scalable**: Async processing with thread pool
-- ✅ **Retry mechanism**: Automatic retry with configurable delay
-- ✅ **Extensible**: Supports extraction of custom user attributes
-
 ## Data Sent
 
 The plugin sends the following data to external API endpoints:
